@@ -1,23 +1,15 @@
 import tkinter as tk
-import mysql.connector
+from mysql.connector import connect
 import tkinter.ttk as ttk
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="433272as",
-    database="myshop"
-)
+connection = connect(host = 'localhost', username='root', password='433272as', database='myshop')
+c = connection.cursor()
+c.execute("SELECT * FROM products")
+result = c.fetchall()
 
-mycursor = mydb.cursor()
+app = tk.Tk()
+app.title("Список товаров")
 
-mycursor.execute("SELECT * FROM products")
-
-result = mycursor.fetchall()
-
-root = tk.Tk()
-root.title("Список товаров")
-
-tv = ttk.Treeview(root)
+tv = ttk.Treeview(app)
 tv.pack()
 
 tv['columns'] = ('Название', 'Описание', 'Количество', 'Цена')
@@ -44,10 +36,10 @@ def add_product():
     quantity = entry_quantity.get()
     price = entry_price.get()
 
-    sql = "INSERT INTO products (name, description, quantity, price) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO products (name, description, quantity, price) VALUES (%s, %s, %s, %s)"
     values = (name, description, quantity, price)
-    mycursor.execute(sql, values)
-    mydb.commit()
+    c.execute(query, values)
+    connection.commit()
 
     tv.insert('', 'end', text='', values=(name, description, quantity, price))
 
@@ -56,7 +48,7 @@ def add_product():
     entry_quantity.delete(0, tk.END)
     entry_price.delete(0, tk.END)
 
-frame_add = tk.Frame(root)
+frame_add = tk.Frame(app)
 frame_add.pack(pady=10)
 
 label_name = tk.Label(frame_add, text='Название:')
@@ -81,4 +73,4 @@ entry_price.grid(row=3, column=1)
 
 button_add = tk.Button(frame_add, text='Добавить товар', command=add_product)
 button_add.grid(row=4, columnspan=2)
-root.mainloop()
+app.mainloop()
